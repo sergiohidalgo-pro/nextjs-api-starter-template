@@ -1,6 +1,15 @@
-# Cl-init-api-nextjs API - Next.js
+# Next.js API Starter Template
 
-Api lista para iniciar nuevos proyectos with JWT authentication, 2FA support, and comprehensive documentation.
+A production-ready API starter template built with Next.js, featuring JWT authentication, 2FA support, and comprehensive documentation.
+
+## 🏗️ Created By
+
+- **Sergio Hidalgo** - Original architecture, design, and project conception
+- **Claude Code (Claude-4 Model by Anthropic)** - Code implementation and development assistance
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
 
 ## Project Overview
 
@@ -133,8 +142,8 @@ RATE_LIMIT_MAX_REQUESTS=5
 1. Use the `AUTH_2FA_SECRET` from your environment variables
 2. Add it to Google Authenticator or any TOTP app:
    - Manual entry: Use the secret directly (e.g., `JBSWY3DPEHPK3PXP`)
-   - Account name: "Cl-init-api-nextjs API"
-   - Issuer: "CL Donlee"
+   - Account name: "Next.js API Starter"
+   - Issuer: "Starter Template"
 
 ## Development Commands
 
@@ -513,6 +522,18 @@ Before deploying to production:
 6. **Set up backup and recovery procedures**
 7. **Review security headers** and CSP policies
 
+## Contributing
+
+This is an open source project. Contributions are welcome! Please feel free to submit issues and pull requests.
+
 ## License
 
-Private project - All rights reserved.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgments
+
+- Built with [Next.js](https://nextjs.org/)
+- Authentication powered by [jsonwebtoken](https://github.com/auth0/node-jsonwebtoken)
+- 2FA implementation using [speakeasy](https://github.com/speakeasyjs/speakeasy)
+- API documentation with [Swagger](https://swagger.io/)
+- Created by Sergio Hidalgo with assistance from Claude Code (Claude-4 Model by Anthropic)

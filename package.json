@@ -1,7 +1,28 @@
 {
-  "name": "cl-donlee-api-base-nextjs",
-  "version": "0.1.0",
-  "private": true,
+  "name": "nextjs-api-starter-template",
+  "version": "1.0.0",
+  "description": "A production-ready Next.js API starter template with JWT authentication, 2FA support, and comprehensive documentation",
+  "keywords": ["nextjs", "api", "typescript", "jwt", "2fa", "authentication", "swagger", "starter-template"],
+  "author": {
+    "name": "Sergio Hidalgo",
+    "url": "https://github.com/sergiohidalgo-pro"
+  },
+  "contributors": [
+    {
+      "name": "Claude Code (Claude-4 Model)",
+      "url": "https://claude.ai/code"
+    }
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sergiohidalgo/nextjs-api-starter-template.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sergiohidalgo/nextjs-api-starter-template/issues"
+  },
+  "homepage": "https://github.com/sergiohidalgo/nextjs-api-starter-template#readme",
+  "private": false,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
