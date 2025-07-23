@@ -1,0 +1,123 @@
+LICENCIA DE SOFTWARE PROPIETARIO
+CODEX SPA - REPÚBLICA DE CHILE
+
+Copyright (c) 2024 CODEX SPA. Todos los derechos reservados.
+
+===============================================================================
+
+TÉRMINOS Y CONDICIONES DE USO
+
+1. DEFINICIONES
+
+   "Software" se refiere al código fuente, código objeto, documentación y 
+   cualquier material relacionado incluido en este paquete.
+   
+   "CODEX SPA" se refiere a la empresa CODEX SPA, registrada en la República 
+   de Chile, RUT: [número a completar].
+   
+   "Licenciatario" se refiere a cualquier persona o entidad que obtenga una 
+   copia de este Software.
+
+2. CONCESIÓN DE LICENCIA
+
+   Sujeto a los términos y condiciones de esta licencia, CODEX SPA otorga al 
+   Licenciatario una licencia limitada, no exclusiva, no transferible y 
+   revocable para:
+   
+   a) Ver y estudiar el código fuente únicamente con fines educativos
+   b) Ejecutar el Software en un entorno de desarrollo local
+   
+   Esta licencia NO incluye el derecho a:
+   - Modificar el Software
+   - Distribuir el Software
+   - Crear obras derivadas
+   - Usar el Software con fines comerciales
+   - Sublicenciar el Software
+
+3. RESTRICCIONES
+
+   El Licenciatario NO puede:
+   
+   a) Copiar, modificar, distribuir, vender o transferir el Software
+   b) Realizar ingeniería inversa, descompilar o desensamblar el Software
+   c) Remover o alterar avisos de copyright, marcas comerciales o 
+      restricciones de patente
+   d) Usar el Software para propósitos comerciales sin autorización expresa
+   e) Crear trabajos derivados basados en el Software
+
+4. PROPIEDAD INTELECTUAL
+
+   CODEX SPA retiene todos los derechos, títulos e intereses en y sobre el 
+   Software, incluyendo todos los derechos de propiedad intelectual. El 
+   Software está protegido por las leyes de copyright y tratados 
+   internacionales de la República de Chile.
+
+5. CRÉDITOS Y ATRIBUCIÓN
+
+   Este Software fue desarrollado por:
+   
+   - Sergio Hidalgo (Inteligencia del Corazón) - Arquitectura y diseño
+   - Anthropic Claude Code (Inteligencia Artificial) - Implementación
+   
+   Cualquier uso permitido debe mantener estos créditos.
+
+6. DESCARGO DE RESPONSABILIDAD
+
+   EL SOFTWARE SE PROPORCIONA "TAL COMO ESTÁ", SIN GARANTÍA DE NINGÚN TIPO, 
+   EXPRESA O IMPLÍCITA, INCLUYENDO PERO NO LIMITADO A GARANTÍAS DE 
+   COMERCIABILIDAD, IDONEIDAD PARA UN PROPÓSITO PARTICULAR Y NO INFRACCIÓN.
+
+7. LIMITACIÓN DE RESPONSABILIDAD
+
+   EN NINGÚN CASO CODEX SPA SERÁ RESPONSABLE POR DAÑOS DIRECTOS, INDIRECTOS, 
+   INCIDENTALES, ESPECIALES, EJEMPLARES O CONSECUENTES (INCLUYENDO, PERO NO 
+   LIMITADO A, PÉRDIDA DE GANANCIAS, INTERRUPCIÓN DEL NEGOCIO, O PÉRDIDA DE 
+   INFORMACIÓN) DERIVADOS DEL USO O INCAPACIDAD DE USAR EL SOFTWARE.
+
+8. TERMINACIÓN
+
+   Esta licencia terminará automáticamente si el Licenciatario viola 
+   cualquier término de esta licencia. Al terminar, el Licenciatario debe 
+   destruir todas las copias del Software.
+
+9. LICENCIAS COMERCIALES
+
+   Para obtener una licencia comercial que permita modificación, distribución 
+   o uso comercial del Software, contactar a:
+   
+   CODEX SPA
+   Email: legal@codex.cl
+   Teléfono: +56 [número a completar]
+   Dirección: [dirección a completar], Chile
+
+10. LEY APLICABLE
+
+    Esta licencia se regirá e interpretará de acuerdo con las leyes de la 
+    República de Chile. Cualquier disputa será resuelta en los tribunales 
+    de Santiago, Chile.
+
+===============================================================================
+
+RECONOCIMIENTOS DE TERCEROS
+
+Este Software utiliza las siguientes librerías de código abierto:
+
+- Next.js (MIT License)
+- React (MIT License)  
+- TypeScript (Apache 2.0 License)
+- Tailwind CSS (MIT License)
+- Zod (MIT License)
+- jsonwebtoken (MIT License)
+- speakeasy (MIT License)
+- swagger-ui-react (Apache 2.0 License)
+
+Ver package.json para la lista completa de dependencias y sus licencias.
+
+===============================================================================
+
+Para consultas sobre esta licencia, contactar:
+CODEX SPA
+República de Chile
+Email: legal@codex.cl
+
+Última actualización: Julio 2024
