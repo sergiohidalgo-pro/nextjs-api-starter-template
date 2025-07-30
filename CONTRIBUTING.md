@@ -180,13 +180,23 @@ If you want to help with bug triage, please:
 - [Jest Testing Framework](https://jestjs.io/docs/getting-started)
 - [Swagger/OpenAPI Specification](https://swagger.io/specification/)
 
-## 💬 Questions?
+## 💬 Questions & Support
 
 Don't hesitate to ask questions! You can:
 
 - **Open an issue** with the `question` label
 - **Start a discussion** in the repository discussions
 - **Check existing issues** - your question might already be answered
+- **Contact the creator directly**: [mail@sergiohidalgo.pro](mailto:mail@sergiohidalgo.pro)
+
+### 📞 Direct Contact
+
+For urgent questions, collaboration opportunities, or technical consulting:
+
+**Sergio Hidalgo** - Project Creator & Maintainer
+- 📧 **Email**: [mail@sergiohidalgo.pro](mailto:mail@sergiohidalgo.pro)
+- 🌐 **Website**: [sergiohidalgo.pro](https://sergiohidalgo.pro)
+- 💼 **GitHub**: [@sergiohidalgo-pro](https://github.com/sergiohidalgo-pro)
 
 ## 🙏 Recognition
 

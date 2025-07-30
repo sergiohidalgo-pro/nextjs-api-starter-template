@@ -4,8 +4,22 @@ A production-ready API starter template built with Next.js, featuring JWT authen
 
 ## 🏗️ Created By
 
-- **Sergio Hidalgo** - Original architecture, design, and project conception
-- **Claude Code (Claude-4 Model by Anthropic)** - Code implementation and development assistance
+- **[Sergio Hidalgo](https://github.com/sergiohidalgo-pro)** - Original architecture, design, and project conception
+- **[Claude Code (Claude-4 Model by Anthropic)](https://claude.ai/code)** - Code implementation and development assistance
+
+### 👨‍💻 Project Creator
+
+**Sergio Hidalgo** - Full Stack Developer & Software Architect
+
+Passionate about creating robust, scalable solutions with modern technologies. This project showcases best practices in API development, security implementation, and AI-assisted development workflows.
+
+**Connect with Sergio:**
+- 🌐 **Portfolio**: [sergiohidalgo.pro](https://sergiohidalgo.pro)
+- 💼 **GitHub**: [@sergiohidalgo-pro](https://github.com/sergiohidalgo-pro)
+- 📸 **Instagram**: [@sergiohidalgo.pro](https://instagram.com/sergiohidalgo.pro)
+- 📧 **Contact**: [mail@sergiohidalgo.pro](mailto:mail@sergiohidalgo.pro)
+
+*Available for freelance projects and technical consulting.*
 
 ## 📄 License
 

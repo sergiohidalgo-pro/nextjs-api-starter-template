@@ -217,8 +217,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Credits and Acknowledgments
 
 This project was created by:
-- **[Sergio Hidalgo](https://github.com/sergiohidalgo)** - Original architecture, design, and project conception
+- **[Sergio Hidalgo](https://github.com/sergiohidalgo-pro)** - Original architecture, design, and project conception
 - **[Claude Code (Claude-4 Model by Anthropic)](https://claude.ai/code)** - Code implementation and development assistance
+
+### 👨‍💻 About the Creator
+
+**Sergio Hidalgo** - Full Stack Developer & Software Architect
+- 🌐 **Website**: [sergiohidalgo.pro](https://sergiohidalgo.pro)
+- 💼 **GitHub**: [@sergiohidalgo-pro](https://github.com/sergiohidalgo-pro)
+- 📸 **Instagram**: [@sergiohidalgo.pro](https://instagram.com/sergiohidalgo.pro)
+- 📧 **Contact**: [mail@sergiohidalgo.pro](mailto:mail@sergiohidalgo.pro)
 
 ### Built With
 
@@ -232,7 +240,9 @@ This project was created by:
 
 ## 🐛 Issues and Support
 
-If you encounter any issues or have questions, please [open an issue](https://github.com/sergiohidalgo/nextjs-api-starter-template/issues) on GitHub.
+If you encounter any issues or have questions, please [open an issue](https://github.com/sergiohidalgo-pro/nextjs-api-starter-template/issues) on GitHub.
+
+For direct support or collaboration inquiries, reach out to [mail@sergiohidalgo.pro](mailto:mail@sergiohidalgo.pro).
 
 ## ⭐ Star History
 
