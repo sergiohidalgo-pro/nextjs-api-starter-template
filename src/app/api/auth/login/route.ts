@@ -4,6 +4,7 @@ import { authRequestSchema } from '@/lib/validators/auth';
 import { AuthService } from '@/services/authService';
 import { handleRateLimiting } from '@/lib/utils/rateLimiter';
 import { getClientIp } from '@/lib/utils/getClientIp';
+import { createResponseTimeTracker, addResponseTimeHeaders } from '@/lib/utils/responseTime';
 
 /**
  * @swagger
@@ -34,6 +35,7 @@ import { getClientIp } from '@/lib/utils/getClientIp';
  *         description: Too Many Requests - Rate limit exceeded.
  */
 export async function POST(request: NextRequest) {
+  const timer = createResponseTimeTracker();
   const clientIp = getClientIp(request);
 
   try {
@@ -49,18 +51,23 @@ export async function POST(request: NextRequest) {
     // Delegate to the authentication service
     const authResponse = await AuthService.authenticateUser(validationResult.data);
     
-    return ApiResponseUtil.success(authResponse, 'Authentication successful');
+    const responseTime = timer.getElapsed();
+    const headers = addResponseTimeHeaders({}, responseTime);
+    return ApiResponseUtil.success(authResponse, 'Authentication successful', headers);
 
   } catch (error: any) {
+    const responseTime = timer.getElapsed();
+    const headers = addResponseTimeHeaders({}, responseTime);
+    
     // Centralized error handling
     if (error.message.includes('Rate limit exceeded')) {
-      return ApiResponseUtil.error({ message: error.message }, 429);
+      return ApiResponseUtil.error({ message: error.message }, 429, headers);
     }
     if (error.message.includes('Invalid')) { // Catches "Invalid username or password" and "Invalid 2FA code"
-      return ApiResponseUtil.unauthorized(error.message);
+      return ApiResponseUtil.unauthorized(error.message, headers);
     }
     
     console.error(`[Login Error] IP: ${clientIp}, Error: ${error.message}`);
-    return ApiResponseUtil.internalError('An unexpected error occurred during login.');
+    return ApiResponseUtil.internalError('An unexpected error occurred during login.', headers);
   }
 }

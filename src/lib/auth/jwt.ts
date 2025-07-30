@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { env } from '@/lib/config/env';
+import { env } from '@/lib/config/env-simple';
 import type { JWTPayload } from '@/lib/types/api';
 
 export class JWTService {

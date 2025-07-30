@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { JWTService } from '@/lib/auth/jwt';
 import { getClientIp } from '@/lib/utils/getClientIp';
 import { rateLimiter } from '@/lib/utils/rateLimiter';
+import { createResponseTimeTracker, addResponseTimeHeaders } from '@/lib/utils/responseTime';
 
 /**
  * @swagger
@@ -104,6 +105,10 @@ import { rateLimiter } from '@/lib/utils/rateLimiter';
  *                           type: string
  *                           format: date-time
  *                           example: "2024-01-01T12:00:00.000Z"
+ *                     responseTime:
+ *                       type: number
+ *                       description: API response time in milliseconds
+ *                       example: 75.32
  *       400:
  *         description: Bad Request - Invalid parameters
  *         content:
@@ -188,6 +193,7 @@ import { rateLimiter } from '@/lib/utils/rateLimiter';
  */
 
 export async function GET(request: NextRequest) {
+  const timer = createResponseTimeTracker();
   // Get client IP
   const clientIp = getClientIp(request);
   
@@ -197,6 +203,14 @@ export async function GET(request: NextRequest) {
     const rateLimitResult = rateLimiter.checkRateLimit(clientIp);
     
     if (!rateLimitResult.allowed) {
+      const responseTime = timer.getElapsed();
+      const headers = addResponseTimeHeaders({
+        'X-RateLimit-Limit': '5',
+        'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+        'X-RateLimit-Reset': Math.ceil(rateLimitResult.resetTime.getTime() / 1000).toString(),
+        'Retry-After': Math.ceil((rateLimitResult.resetTime.getTime() - Date.now()) / 1000).toString()
+      }, responseTime);
+      
       return NextResponse.json(
         {
           success: false,
@@ -206,24 +220,19 @@ export async function GET(request: NextRequest) {
             rateLimited: true,
             remaining: rateLimitResult.remaining,
             resetTime: rateLimitResult.resetTime.toISOString(),
-            clientIp: clientIp
+            clientIp: clientIp,
+            responseTime: Math.round(responseTime * 100) / 100
           }
         },
-        { 
-          status: 429,
-          headers: {
-            'X-RateLimit-Limit': '5',
-            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-            'X-RateLimit-Reset': Math.ceil(rateLimitResult.resetTime.getTime() / 1000).toString(),
-            'Retry-After': Math.ceil((rateLimitResult.resetTime.getTime() - Date.now()) / 1000).toString()
-          }
-        }
+        { status: 429, headers }
       );
     }
 
     // Extract token from Authorization header
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      const responseTime = timer.getElapsed();
+      const headers = addResponseTimeHeaders({}, responseTime);
       return NextResponse.json(
         {
           success: false,
@@ -231,10 +240,11 @@ export async function GET(request: NextRequest) {
           message: 'Authorization header must be in format: Bearer <token>',
           data: {
             clientIp: clientIp,
-            remaining: rateLimitResult.remaining
+            remaining: rateLimitResult.remaining,
+            responseTime: Math.round(responseTime * 100) / 100
           }
         },
-        { status: 401 }
+        { status: 401, headers }
       );
     }
 
@@ -244,6 +254,8 @@ export async function GET(request: NextRequest) {
     try {
       JWTService.verifyAccessToken(token);
     } catch {
+      const responseTime = timer.getElapsed();
+      const headers = addResponseTimeHeaders({}, responseTime);
       return NextResponse.json(
         {
           success: false,
@@ -251,10 +263,11 @@ export async function GET(request: NextRequest) {
           message: 'The provided JWT token is invalid or expired',
           data: {
             clientIp: clientIp,
-            remaining: rateLimitResult.remaining
+            remaining: rateLimitResult.remaining,
+            responseTime: Math.round(responseTime * 100) / 100
           }
         },
-        { status: 401 }
+        { status: 401, headers }
       );
     }
 
@@ -266,13 +279,15 @@ export async function GET(request: NextRequest) {
 
     // Validate numbers
     if (isNaN(a) || isNaN(b)) {
+      const responseTime = timer.getElapsed();
+      const headers = addResponseTimeHeaders({}, responseTime);
       return NextResponse.json(
         {
           success: false,
           error: 'Invalid parameters',
           message: 'Parameters a and b must be valid numbers'
         },
-        { status: 400 }
+        { status: 400, headers }
       );
     }
 
@@ -295,30 +310,41 @@ export async function GET(request: NextRequest) {
         break;
       case 'divide':
         if (b === 0) {
+          const responseTime = timer.getElapsed();
+          const headers = addResponseTimeHeaders({}, responseTime);
           return NextResponse.json(
             {
               success: false,
               error: 'Invalid parameters',
               message: 'Division by zero is not allowed'
             },
-            { status: 400 }
+            { status: 400, headers }
           );
         }
         result = a / b;
         symbol = '/';
         break;
       default:
+        const responseTime = timer.getElapsed();
+        const headers = addResponseTimeHeaders({}, responseTime);
         return NextResponse.json(
           {
             success: false,
             error: 'Invalid operation',
             message: 'Operation must be one of: add, subtract, multiply, divide'
           },
-          { status: 400 }
+          { status: 400, headers }
         );
     }
 
     // Return successful result
+    const responseTime = timer.getElapsed();
+    const headers = addResponseTimeHeaders({
+      'X-RateLimit-Limit': '5',
+      'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+      'X-RateLimit-Reset': Math.ceil(rateLimitResult.resetTime.getTime() / 1000).toString()
+    }, responseTime);
+    
     return NextResponse.json(
       {
         success: true,
@@ -330,22 +356,19 @@ export async function GET(request: NextRequest) {
           result,
           expression: `${a} ${symbol} ${b} = ${result}`,
           clientIp: clientIp,
+          responseTime: Math.round(responseTime * 100) / 100,
           rateLimit: {
             remaining: rateLimitResult.remaining,
             resetTime: rateLimitResult.resetTime.toISOString()
           }
         }
       },
-      {
-        headers: {
-          'X-RateLimit-Limit': '5',
-          'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-          'X-RateLimit-Reset': Math.ceil(rateLimitResult.resetTime.getTime() / 1000).toString()
-        }
-      }
+      { headers }
     );
 
   } catch {
+    const responseTime = timer.getElapsed();
+    const headers = addResponseTimeHeaders({}, responseTime);
     // Secure logging - don't log sensitive information
     console.error('Math operation failed from IP:', clientIp);
     
@@ -355,7 +378,7 @@ export async function GET(request: NextRequest) {
         error: 'Internal server error',
         message: 'An error occurred while processing the math operation'
       },
-      { status: 500 }
+      { status: 500, headers }
     );
   }
 }

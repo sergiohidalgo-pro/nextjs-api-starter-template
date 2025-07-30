@@ -1,275 +1,238 @@
 #!/bin/bash
 
-# Colores para output
+# Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Función para mostrar header
-show_header() {
-    echo -e "${BLUE}"
-    echo "╔══════════════════════════════════════════════════════════════╗"
-    echo "║                   🚀 API Project Initializer                ║"
-    echo "║                                                              ║"
-    echo "║            Configura tu nueva API base Next.js              ║"
-    echo "╚══════════════════════════════════════════════════════════════╝"
-    echo -e "${NC}"
+# Function to print colored output
+print_status() {
+    echo -e "${GREEN}[INFO]${NC} $1"
 }
 
-# Función para mostrar mensaje de error
-error() {
-    echo -e "${RED}❌ Error: $1${NC}"
+print_warning() {
+    echo -e "${YELLOW}[WARNING]${NC} $1"
+}
+
+print_error() {
+    echo -e "${RED}[ERROR]${NC} $1"
+}
+
+print_header() {
+    echo -e "${BLUE}[SETUP]${NC} $1"
+}
+
+# Check if running from project root
+if [ ! -f "package.json" ]; then
+    print_error "This script must be run from the project root directory"
     exit 1
-}
+fi
 
-# Función para mostrar mensaje de éxito
-success() {
-    echo -e "${GREEN}✅ $1${NC}"
-}
+print_header "🚀 Initializing Next.js API Starter Template"
+echo ""
 
-# Función para mostrar mensaje de información
-info() {
-    echo -e "${BLUE}ℹ️  $1${NC}"
-}
+# Step 1: Check Node.js and pnpm
+print_status "Checking prerequisites..."
+if ! command -v node &> /dev/null; then
+    print_error "Node.js is not installed. Please install Node.js 18+ first."
+    exit 1
+fi
 
-# Función para mostrar mensaje de advertencia
-warning() {
-    echo -e "${YELLOW}⚠️  $1${NC}"
-}
+if ! command -v pnpm &> /dev/null; then
+    print_error "pnpm is not installed. Installing pnpm globally..."
+    npm install -g pnpm
+fi
 
-# Función para validar nombre del proyecto
-validate_project_name() {
-    local name=$1
-    if [[ ! $name =~ ^[a-z0-9-]+$ ]]; then
-        return 1
-    fi
-    return 0
-}
+NODE_VERSION=$(node --version)
+print_status "Node.js version: $NODE_VERSION"
 
-# Función para generar JWT secret aleatorio
-generate_jwt_secret() {
-    openssl rand -base64 64 | tr -d "=+/" | cut -c1-64
-}
+# Step 2: Install dependencies
+print_status "Installing dependencies with pnpm..."
+pnpm install
 
-# Función para generar 2FA secret aleatorio
-generate_2fa_secret() {
-    openssl rand -base64 20 | tr -d "=+/" | tr '[:lower:]' '[:upper:]' | cut -c1-16
-}
+# Step 3: Generate environment file
+print_header "🔧 Setting up environment variables"
 
-# Función principal
-main() {
-    show_header
-    
-    # Verificar que estamos en el directorio correcto
-    if [[ ! -f "package.json" ]]; then
-        error "Este script debe ejecutarse desde la raíz del proyecto (donde está package.json)"
-    fi
-    
-    # Verificar que es un proyecto Next.js válido
-    if ! grep -q '"next":' package.json; then
-        error "Este script debe ejecutarse en un proyecto Next.js válido"
-    fi
-    
-    info "¡Vamos a configurar tu nueva API base!"
-    echo
-    
-    # Solicitar información del proyecto
-    while true; do
-        read -p "📝 Nombre del proyecto (solo minúsculas, números y guiones): " PROJECT_NAME
-        if validate_project_name "$PROJECT_NAME"; then
-            break
-        else
-            warning "Nombre inválido. Use solo minúsculas, números y guiones (ej: mi-api-proyecto)"
-        fi
-    done
-    
-    read -p "📄 Descripción del proyecto: " PROJECT_DESCRIPTION
-    read -p "👤 Nombre del autor: " AUTHOR_NAME
-    read -p "📧 Email del autor: " AUTHOR_EMAIL
-    
-    # Configuración de autenticación
-    echo
-    info "Configuración de autenticación:"
-    read -p "🔐 Usuario por defecto para la API (default: admin): " AUTH_USERNAME
-    AUTH_USERNAME=${AUTH_USERNAME:-admin}
-    
-    read -s -p "🔑 Contraseña por defecto (mínimo 8 caracteres): " AUTH_PASSWORD
-    echo
-    while [[ ${#AUTH_PASSWORD} -lt 8 ]]; do
-        warning "La contraseña debe tener al menos 8 caracteres"
-        read -s -p "🔑 Contraseña por defecto (mínimo 8 caracteres): " AUTH_PASSWORD
-        echo
-    done
-    
-    # Generar secrets
-    info "Generando secrets de seguridad..."
-    JWT_SECRET=$(generate_jwt_secret)
-    FA_SECRET=$(generate_2fa_secret)
-    
-    echo
-    info "Configuración a aplicar:"
-    echo "  • Nombre: $PROJECT_NAME"
-    echo "  • Descripción: $PROJECT_DESCRIPTION"
-    echo "  • Autor: $AUTHOR_NAME <$AUTHOR_EMAIL>"
-    echo "  • Usuario API: $AUTH_USERNAME"
-    echo "  • JWT Secret: ${JWT_SECRET:0:20}... (generado)"
-    echo "  • 2FA Secret: $FA_SECRET (generado)"
-    
-    echo
-    read -p "¿Continuar con la configuración? (y/N): " CONFIRM
-    if [[ ! $CONFIRM =~ ^[Yy]$ ]]; then
-        info "Configuración cancelada"
-        exit 0
-    fi
-    
-    echo
-    info "🚀 Iniciando configuración del proyecto..."
-    
-    # 1. Actualizar package.json
-    info "📦 Actualizando package.json..."
-    sed -i.bak "s/\"cl-donlee-api-nextjs\"/\"$PROJECT_NAME\"/" package.json
-    success "package.json actualizado"
-    
-    # 2. Actualizar README.md
-    if [[ -f "README.md" ]]; then
-        info "📚 Actualizando README.md..."
-        # Capitalize first letter of project name
-        CAPITALIZED_NAME="$(echo ${PROJECT_NAME:0:1} | tr '[:lower:]' '[:upper:]')${PROJECT_NAME:1}"
-        sed -i.bak "s/CL Donlee API/${CAPITALIZED_NAME} API/g" README.md
-        sed -i.bak "s/cl-donlee-api-nextjs/$PROJECT_NAME/g" README.md
-        sed -i.bak "s/cl-donlee-api-base-nextjs/$PROJECT_NAME/g" README.md
-        sed -i.bak "s/cl-donlee-api-base2-nextjs/$PROJECT_NAME/g" README.md
-        sed -i.bak "s/A modern Next.js API/$PROJECT_DESCRIPTION/g" README.md
-        success "README.md actualizado"
-    fi
-    
-    # 3. Actualizar CLAUDE.md
-    if [[ -f "CLAUDE.md" ]]; then
-        info "🤖 Actualizando CLAUDE.md..."
-        # Capitalize first letter of project name
-        CAPITALIZED_NAME="$(echo ${PROJECT_NAME:0:1} | tr '[:lower:]' '[:upper:]')${PROJECT_NAME:1}"
-        sed -i.bak "s/CL Donlee API/${CAPITALIZED_NAME} API/g" CLAUDE.md
-        sed -i.bak "s/cl-donlee-api-nextjs/$PROJECT_NAME/g" CLAUDE.md
-        sed -i.bak "s/cl-donlee-api-base-nextjs/$PROJECT_NAME/g" CLAUDE.md
-        sed -i.bak "s/cl-donlee-api-base2-nextjs/$PROJECT_NAME/g" CLAUDE.md
-        sed -i.bak "s/A modern Next.js API/$PROJECT_DESCRIPTION/g" CLAUDE.md
-        success "CLAUDE.md actualizado"
-    fi
-    
-    # 4. Actualizar archivos de código
-    info "💻 Actualizando archivos de código..."
-    
-    # Actualizar page.tsx
-    if [[ -f "src/app/page.tsx" ]]; then
-        # Use previously calculated capitalized name
-        sed -i.bak "s/CL Donlee API/${CAPITALIZED_NAME} API/g" src/app/page.tsx
-        sed -i.bak "s/cl-donlee/$PROJECT_NAME/g" src/app/page.tsx
-    fi
-    
-    # Actualizar docs/page.tsx
-    if [[ -f "src/app/docs/page.tsx" ]]; then
-        sed -i.bak "s/CL Donlee API/${CAPITALIZED_NAME} API/g" src/app/docs/page.tsx
-    fi
-    
-    # Actualizar swagger.ts
-    if [[ -f "src/lib/config/swagger.ts" ]]; then
-        sed -i.bak "s/CL Donlee API/${CAPITALIZED_NAME} API/g" src/lib/config/swagger.ts
-        sed -i.bak "s/A modern Next.js API/$PROJECT_DESCRIPTION/g" src/lib/config/swagger.ts
-    fi
-    
-    # Actualizar totp.ts
-    if [[ -f "src/lib/auth/totp.ts" ]]; then
-        sed -i.bak "s/CL Donlee/${CAPITALIZED_NAME}/g" src/lib/auth/totp.ts
+if [ -f ".env" ]; then
+    print_warning ".env already exists. Creating backup..."
+    cp .env .env.backup.$(date +%Y%m%d_%H%M%S)
+fi
+
+# Copy from example
+cp .env.example .env
+
+# Generate JWT secret
+print_status "Generating JWT secret..."
+JWT_SECRET=$(node -e "console.log(require('crypto').randomBytes(64).toString('hex'))")
+
+# Generate 2FA secret
+print_status "Generating 2FA secret..."
+TOTP_SECRET=$(node -e "
+const speakeasy = require('speakeasy');
+const secret = speakeasy.generateSecret({
+    name: 'Next.js API Starter',
+    issuer: 'Starter Template'
+});
+console.log(secret.base32);
+")
+
+# Replace placeholders in .env
+print_status "Updating environment variables..."
+
+# Use different delimiters to avoid conflicts with special characters
+sed -i.bak "s|JWT_SECRET=.*|JWT_SECRET=$JWT_SECRET|g" .env
+sed -i.bak "s|AUTH_2FA_SECRET=.*|AUTH_2FA_SECRET=$TOTP_SECRET|g" .env
+
+# Generate random password
+RANDOM_PASSWORD=$(node -e "console.log(require('crypto').randomBytes(16).toString('hex'))")
+sed -i.bak "s|AUTH_PASSWORD=.*|AUTH_PASSWORD=$RANDOM_PASSWORD|g" .env
+
+# Clean up backup file
+rm .env.bak
+
+print_status "Environment file created successfully!"
+
+# Step 4: Setup development mode selection
+echo ""
+print_header "🐳 Choose your development setup:"
+echo "1) Hybrid setup (Docker MongoDB + Local API) - RECOMMENDED"
+echo "2) Full Docker Compose (API + MongoDB)"
+echo "3) Local development (requires local MongoDB)"
+echo -n "Enter your choice (1-3) [1]: "
+read -r SETUP_CHOICE
+
+# Default to option 1 if no input
+if [ -z "$SETUP_CHOICE" ]; then
+    SETUP_CHOICE=1
+fi
+
+case $SETUP_CHOICE in
+    1)
+        print_status "Setting up hybrid mode (Docker MongoDB + Local API)..."
+        print_status "Starting MongoDB container..."
         
-        # Actualizar documentación
-        if [[ -f "docs/CONTRIBUTING.md" ]]; then
-            sed -i.bak "s/CL Donlee API/${CAPITALIZED_NAME} API/g" docs/CONTRIBUTING.md
-            sed -i.bak "s/CL Donlee/${CAPITALIZED_NAME}/g" docs/CONTRIBUTING.md
-            sed -i.bak "s/cl-donlee-api-nextjs/$PROJECT_NAME/g" docs/CONTRIBUTING.md
-        fi
+        # Stop and remove existing container if it exists
+        docker stop mongodb-dev 2>/dev/null || true
+        docker rm mongodb-dev 2>/dev/null || true
         
-        if [[ -f "docs/RELEASE_v1.0.0.md" ]]; then
-            sed -i.bak "s/CL Donlee API/${CAPITALIZED_NAME} API/g" docs/RELEASE_v1.0.0.md
-            sed -i.bak "s/CL Donlee/${CAPITALIZED_NAME}/g" docs/RELEASE_v1.0.0.md
-            sed -i.bak "s/cl-donlee-api-nextjs/$PROJECT_NAME/g" docs/RELEASE_v1.0.0.md
+        # Start new MongoDB container
+        docker run -d --name mongodb-dev \
+            -p 27017:27017 \
+            -e MONGO_INITDB_ROOT_USERNAME=admin \
+            -e MONGO_INITDB_ROOT_PASSWORD=password \
+            -e MONGO_INITDB_DATABASE=nextjs-api \
+            -v mongodb_data:/data/db \
+            mongo:7-jammy
+        
+        print_status "MongoDB container started!"
+        print_status "Connection string: mongodb://admin:password@localhost:27017/nextjs-api?authSource=admin"
+        
+        # Ensure .env has the correct connection string with authentication
+        sed -i.bak "s|MONGODB_URI=.*|MONGODB_URI=mongodb://admin:password@localhost:27017/nextjs-api?authSource=admin|g" .env
+        rm .env.bak
+        ;;
+    2) 
+        print_status "Setting up for Docker Compose..."
+        # Update connection string for Docker Compose with authentication
+        sed -i.bak "s|MONGODB_URI=.*|MONGODB_URI=mongodb://admin:password@mongo:27017/nextjs-api?authSource=admin|g" .env
+        rm .env.bak
+        print_status "Starting Docker Compose services..."
+        docker-compose up -d
+        print_status "Services started! API will be available at http://localhost:3000"
+        ;;
+    3)
+        print_status "Setting up for local development..."
+        # Keep the default localhost connection
+        print_warning "Make sure MongoDB is running locally on port 27017"
+        print_status "You can start MongoDB with: mongod --dbpath /path/to/db"
+        print_status "Or install MongoDB: https://docs.mongodb.com/manual/installation/"
+        ;;
+    *)
+        print_warning "Invalid choice. Defaulting to hybrid setup."
+        SETUP_CHOICE=1
+        # Repeat the hybrid setup logic
+        print_status "Setting up hybrid mode (Docker MongoDB + Local API)..."
+        docker stop mongodb-dev 2>/dev/null || true
+        docker rm mongodb-dev 2>/dev/null || true
+        docker run -d --name mongodb-dev \
+            -p 27017:27017 \
+            -e MONGO_INITDB_ROOT_USERNAME=admin \
+            -e MONGO_INITDB_ROOT_PASSWORD=password \
+            -e MONGO_INITDB_DATABASE=nextjs-api \
+            -v mongodb_data:/data/db \
+            mongo:7-jammy
+        print_status "MongoDB container started!"
+        print_status "Connection string: mongodb://admin:password@localhost:27017/nextjs-api?authSource=admin"
+        
+        # Ensure .env has the correct connection string with authentication
+        sed -i.bak "s|MONGODB_URI=.*|MONGODB_URI=mongodb://admin:password@localhost:27017/nextjs-api?authSource=admin|g" .env
+        rm .env.bak
+        ;;
+esac
+
+# Step 5: Generate Prisma client
+print_status "Generating Prisma client..."
+pnpm prisma:generate
+
+# Step 6: Display setup information
+echo ""
+print_header "🎉 Setup Complete!"
+echo ""
+print_status "Your credentials:"
+echo "  Username: admin"
+echo "  Password: $RANDOM_PASSWORD"
+echo "  2FA Secret: $TOTP_SECRET"
+echo ""
+print_status "Add the 2FA secret to your authenticator app:"
+echo "  1. Open Google Authenticator or similar app"
+echo "  2. Scan QR code or enter secret manually: $TOTP_SECRET"
+echo "  3. Account name: Next.js API Starter"
+echo ""
+print_status "Next steps:"
+case $SETUP_CHOICE in
+    1)
+        echo "  1. MongoDB is running in Docker container 'mongodb-dev'"
+        echo "  2. Run: pnpm dev"
+        echo "  3. Stop MongoDB later with: docker stop mongodb-dev"
+        ;;
+    2)
+        echo "  1. API is already running at http://localhost:3000"
+        echo "  2. Check logs with: docker-compose logs -f api"
+        echo "  3. Stop services with: docker-compose down"
+        ;;
+    3)
+        echo "  1. Start MongoDB locally first"
+        echo "  2. Run: pnpm dev"
+        ;;
+esac
+echo "  3. Visit http://localhost:3000 to test the API"
+echo "  4. Visit http://localhost:3000/docs for Swagger documentation"
+echo ""
+print_warning "⚠️  Save your credentials! They won't be displayed again."
+print_status "Environment file: .env"
+echo ""
+
+# Step 7: Offer to open in browser
+if command -v open &> /dev/null; then  # macOS
+    echo -n "Open the application in browser? (y/n): "
+    read -r OPEN_BROWSER
+    if [ "$OPEN_BROWSER" = "y" ] || [ "$OPEN_BROWSER" = "Y" ]; then
+        if [ "$SETUP_CHOICE" = "2" ]; then
+            sleep 3  # Wait for Docker services to start
         fi
+        open http://localhost:3000
     fi
-    
-    success "Archivos de código y documentación actualizados"
-    
-    # 5. Crear archivo .env.local
-    info "🔧 Creando archivo .env.local..."
-    cat > .env.local << EOF
-# JWT Configuration
-JWT_SECRET=$JWT_SECRET
-JWT_EXPIRES_IN=1h
-
-# Authentication Configuration
-AUTH_USERNAME=$AUTH_USERNAME
-AUTH_PASSWORD=$AUTH_PASSWORD
-AUTH_2FA_SECRET=$FA_SECRET
-
-# Environment Configuration
-NODE_ENV=development
-API_BASE_URL=http://localhost:3000
-
-# Rate Limiting
-RATE_LIMIT_MAX_REQUESTS=5
-EOF
-    success ".env.local creado con configuración personalizada"
-    
-    # 6. Crear .env.example
-    info "📋 Creando .env.example..."
-    cat > .env.example << EOF
-# JWT Configuration
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-JWT_EXPIRES_IN=1h
-
-# Authentication Configuration
-AUTH_USERNAME=admin
-AUTH_PASSWORD=secure-password-123
-AUTH_2FA_SECRET=JBSWY3DPEHPK3PXP
-
-# Environment Configuration
-NODE_ENV=development
-API_BASE_URL=http://localhost:3000
-
-# Rate Limiting
-RATE_LIMIT_MAX_REQUESTS=5
-EOF
-    success ".env.example creado"
-    
-    # 7. Limpiar archivos de backup
-    info "🧹 Limpiando archivos temporales..."
-    find . -name "*.bak" -delete
-    success "Archivos temporales eliminados"
-    
-    # 8. Limpiar documentos específicos del proyecto original
-    if [[ -d "docs" ]]; then
-        info "📄 Limpiando documentación específica del proyecto original..."
-        rm -f docs/RELEASE_v1.0.0.md
-        rm -f docs/CONTRIBUTING.md
-        success "Documentación original eliminada"
+elif command -v xdg-open &> /dev/null; then  # Linux
+    echo -n "Open the application in browser? (y/n): "
+    read -r OPEN_BROWSER
+    if [ "$OPEN_BROWSER" = "y" ] || [ "$OPEN_BROWSER" = "Y" ]; then
+        if [ "$SETUP_CHOICE" = "2" ]; then
+            sleep 3  # Wait for Docker services to start
+        fi
+        xdg-open http://localhost:3000
     fi
-    
-    echo
-    success "🎉 ¡Proyecto inicializado exitosamente!"
-    echo
-    info "Próximos pasos:"
-    echo "  1. Instalar dependencias: pnpm install"
-    echo "  2. Configurar 2FA con el secret: $FA_SECRET"
-    echo "     • Agregar a Google Authenticator o similar"
-    echo "     • Nombre de cuenta: \"${CAPITALIZED_NAME} API\""
-    echo "     • Emisor: \"${CAPITALIZED_NAME}\""
-    echo "  3. Iniciar desarrollo: pnpm dev"
-    echo "  4. Acceder a: http://localhost:3000"
-    echo
-    warning "¡Importante! Cambia las credenciales por defecto antes de producción"
-    echo
-    info "Tu nuevo proyecto API está listo para desarrollar 🚀"
-}
+fi
 
-# Ejecutar función principal
-main "$@"
+print_status "Setup completed successfully! 🎉"

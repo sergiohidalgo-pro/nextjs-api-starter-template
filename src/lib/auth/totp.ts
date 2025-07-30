@@ -1,5 +1,5 @@
 import speakeasy from 'speakeasy';
-import { env } from '@/lib/config/env';
+import { env } from '@/lib/config/env-simple';
 
 export class TOTPService {
   static verifyToken(token: string): boolean {

@@ -370,3 +370,15 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/webstorm+all,jetbrains+all,visualstudiocode,node,nextjs,dotenv,backup,windows
+
+# Project specific
+src/generated/
+test-*.js
+test-*.sh
+*.test.env
+.env.example.temp
+direct-auth-test.js
+
+# Generated Prisma files (don't commit generated client code)
+prisma/migrations/
+src/generated/prisma/

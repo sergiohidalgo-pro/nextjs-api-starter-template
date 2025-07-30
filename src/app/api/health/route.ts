@@ -1,5 +1,7 @@
 import { ApiResponseUtil } from '@/lib/utils/apiResponse';
 import type { HealthCheckResponse } from '@/lib/types/api';
+import { testDatabaseConnection } from '@/lib/db/init';
+import { createResponseTimeTracker, addResponseTimeHeaders } from '@/lib/utils/responseTime';
 import packageJson from '../../../../package.json';
 
 /**
@@ -36,20 +38,48 @@ import packageJson from '../../../../package.json';
  *                     version:
  *                       type: string
  *                       example: 0.1.0
+ *                     database:
+ *                       type: object
+ *                       properties:
+ *                         connected:
+ *                           type: boolean
+ *                           example: true
+ *                         responseTime:
+ *                           type: number
+ *                           example: 45
+ *                     responseTime:
+ *                       type: number
+ *                       description: API response time in milliseconds
+ *                       example: 125.45
  */
 export async function GET() {
+  const timer = createResponseTimeTracker();
+  
   try {
+    // Test database connection
+    const dbTest = await testDatabaseConnection();
+    
+    const responseTime = timer.getElapsed();
+    
     const healthData: HealthCheckResponse = {
-      status: 'healthy',
+      status: dbTest.success ? 'healthy' : 'degraded',
       timestamp: Date.now(),
       uptime: process.uptime(),
       version: packageJson.version,
       environment: process.env.NODE_ENV || 'development',
+      database: {
+        connected: dbTest.success,
+        responseTime: dbTest.duration
+      },
+      responseTime: Math.round(responseTime * 100) / 100 // Round to 2 decimal places
     };
 
-    return ApiResponseUtil.success(healthData, 'API is running healthy');
+    const headers = addResponseTimeHeaders({}, responseTime);
+    return ApiResponseUtil.success(healthData, 'API health check completed', headers);
   } catch (error) {
+    const responseTime = timer.getElapsed();
+    const headers = addResponseTimeHeaders({}, responseTime);
     console.error('Health check failed:', error);
-    return ApiResponseUtil.internalError('Health check failed');
+    return ApiResponseUtil.internalError('Health check failed', headers);
   }
 }

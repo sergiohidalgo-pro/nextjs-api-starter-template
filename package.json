@@ -2,7 +2,16 @@
   "name": "nextjs-api-starter-template",
   "version": "1.0.0",
   "description": "A production-ready Next.js API starter template with JWT authentication, 2FA support, and comprehensive documentation",
-  "keywords": ["nextjs", "api", "typescript", "jwt", "2fa", "authentication", "swagger", "starter-template"],
+  "keywords": [
+    "nextjs",
+    "api",
+    "typescript",
+    "jwt",
+    "2fa",
+    "authentication",
+    "swagger",
+    "starter-template"
+  ],
   "author": {
     "name": "Sergio Hidalgo",
     "url": "https://github.com/sergiohidalgo-pro"
@@ -24,7 +33,7 @@
   "homepage": "https://github.com/sergiohidalgo/nextjs-api-starter-template#readme",
   "private": false,
   "scripts": {
-    "dev": "next dev",
+    "dev": "prisma db push --skip-generate && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -34,13 +43,30 @@
     "test:coverage": "jest --coverage",
     "generate:jwt-secret": "node scripts/generate-jwt-secret.js",
     "generate:2fa-secret": "node scripts/generate-2fa-secret.js",
-    "init": "./scripts/init-project.sh"
+    "init": "./scripts/init-project.sh",
+    "setup": "./scripts/init-project.sh",
+    "quick-setup": "./scripts/quick-setup.sh",
+    "dev-tools": "./scripts/dev-tools.sh",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f api",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up -d",
+    "docker:dev-down": "docker-compose -f docker-compose.dev.yml down",
+    "prisma:generate": "prisma generate",
+    "prisma:push": "prisma db push",
+    "change-password": "node scripts/change-password.js"
   },
   "dependencies": {
+    "@prisma/client": "^6.12.0",
+    "@types/marked": "^6.0.0",
     "bcryptjs": "^3.0.2",
     "dotenv": "^17.2.0",
     "jsonwebtoken": "^9.0.2",
+    "marked": "^16.1.1",
+    "mongodb": "^6.18.0",
     "next": "15.4.3",
+    "prisma": "^6.12.0",
     "qrcode": "^1.5.4",
     "react": "19.1.0",
     "react-dom": "19.1.0",

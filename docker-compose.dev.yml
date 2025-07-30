@@ -1,0 +1,50 @@
+# Docker Compose for Development
+# This version allows connecting to MongoDB from your local machine
+# while running the API locally
+
+services:
+  mongo:
+    image: mongo:7-jammy
+    container_name: nextjs-api-mongo-dev
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USER:-admin}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD:-password}
+      - MONGO_INITDB_DATABASE=nextjs-api
+    volumes:
+      - mongo_dev_data:/data/db
+    ports:
+      - "27017:27017"  # MongoDB exposed on localhost:27017
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    networks:
+      - nextjs-api-network
+
+  # Optional: MongoDB Express for database management
+  mongo-express:
+    image: mongo-express:1.0.2
+    container_name: nextjs-api-mongo-express
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=${MONGO_ROOT_USER:-admin}
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=${MONGO_ROOT_PASSWORD:-password}
+      - ME_CONFIG_MONGODB_URL=mongodb://admin:password@mongo:27017/
+      - ME_CONFIG_BASICAUTH=false
+    ports:
+      - "8081:8081"  # MongoDB Express UI at http://localhost:8081
+    depends_on:
+      mongo:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - nextjs-api-network
+
+volumes:
+  mongo_dev_data:
+
+networks:
+  nextjs-api-network:
+    driver: bridge

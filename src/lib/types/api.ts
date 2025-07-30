@@ -6,11 +6,16 @@ export interface ApiResponse<T = unknown> {
 }
 
 export interface HealthCheckResponse {
-  status: 'healthy';
+  status: 'healthy' | 'degraded';
   timestamp: number;
   uptime: number;
   version: string;
   environment: string;
+  responseTime: number;
+  database?: {
+    connected: boolean;
+    responseTime: number;
+  };
 }
 
 export interface AuthRequest {

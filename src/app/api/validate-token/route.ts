@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { JWTService } from '@/lib/auth/jwt';
 import { getClientIp } from '@/lib/utils/getClientIp';
 import { rateLimiter } from '@/lib/utils/rateLimiter';
+import { createResponseTimeTracker, addResponseTimeHeaders } from '@/lib/utils/responseTime';
 
 /**
  * @swagger
@@ -79,6 +80,10 @@ import { rateLimiter } from '@/lib/utils/rateLimiter';
  *                           type: string
  *                           format: date-time
  *                           example: "2024-01-01T12:00:00.000Z"
+ *                     responseTime:
+ *                       type: number
+ *                       description: API response time in milliseconds
+ *                       example: 45.67
  *       401:
  *         description: Unauthorized - Invalid or missing token
  *         content:
@@ -172,6 +177,8 @@ import { rateLimiter } from '@/lib/utils/rateLimiter';
  */
 
 export async function GET(request: NextRequest) {
+  const timer = createResponseTimeTracker();
+  
   try {
     // Get client IP
     const clientIp = getClientIp(request);
@@ -180,6 +187,14 @@ export async function GET(request: NextRequest) {
     const rateLimitResult = rateLimiter.checkRateLimit(clientIp);
     
     if (!rateLimitResult.allowed) {
+      const responseTime = timer.getElapsed();
+      const headers = addResponseTimeHeaders({
+        'X-RateLimit-Limit': '5',
+        'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+        'X-RateLimit-Reset': Math.ceil(rateLimitResult.resetTime.getTime() / 1000).toString(),
+        'Retry-After': Math.ceil((rateLimitResult.resetTime.getTime() - Date.now()) / 1000).toString()
+      }, responseTime);
+      
       return NextResponse.json(
         {
           success: false,
@@ -189,24 +204,19 @@ export async function GET(request: NextRequest) {
             rateLimited: true,
             remaining: rateLimitResult.remaining,
             resetTime: rateLimitResult.resetTime.toISOString(),
-            clientIp: clientIp
+            clientIp: clientIp,
+            responseTime: Math.round(responseTime * 100) / 100
           }
         },
-        { 
-          status: 429,
-          headers: {
-            'X-RateLimit-Limit': '5',
-            'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-            'X-RateLimit-Reset': Math.ceil(rateLimitResult.resetTime.getTime() / 1000).toString(),
-            'Retry-After': Math.ceil((rateLimitResult.resetTime.getTime() - Date.now()) / 1000).toString()
-          }
-        }
+        { status: 429, headers }
       );
     }
 
     // Extract token from Authorization header
     const authHeader = request.headers.get('authorization');
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      const responseTime = timer.getElapsed();
+      const headers = addResponseTimeHeaders({}, responseTime);
       return NextResponse.json(
         {
           success: false,
@@ -214,10 +224,11 @@ export async function GET(request: NextRequest) {
           message: 'Authorization header must be in format: Bearer <token>',
           data: {
             clientIp: clientIp,
-            remaining: rateLimitResult.remaining
+            remaining: rateLimitResult.remaining,
+            responseTime: Math.round(responseTime * 100) / 100
           }
         },
-        { status: 401 }
+        { status: 401, headers }
       );
     }
 
@@ -228,6 +239,8 @@ export async function GET(request: NextRequest) {
     try {
       decoded = JWTService.verifyAccessToken(token);
     } catch {
+      const responseTime = timer.getElapsed();
+      const headers = addResponseTimeHeaders({}, responseTime);
       return NextResponse.json(
         {
           success: false,
@@ -235,14 +248,22 @@ export async function GET(request: NextRequest) {
           message: 'The provided JWT token is invalid or expired',
           data: {
             clientIp: clientIp,
-            remaining: rateLimitResult.remaining
+            remaining: rateLimitResult.remaining,
+            responseTime: Math.round(responseTime * 100) / 100
           }
         },
-        { status: 401 }
+        { status: 401, headers }
       );
     }
 
     // Token is valid
+    const responseTime = timer.getElapsed();
+    const headers = addResponseTimeHeaders({
+      'X-RateLimit-Limit': '5',
+      'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
+      'X-RateLimit-Reset': Math.ceil(rateLimitResult.resetTime.getTime() / 1000).toString()
+    }, responseTime);
+    
     return NextResponse.json(
       {
         success: true,
@@ -250,6 +271,7 @@ export async function GET(request: NextRequest) {
         data: {
           tokenValid: true,
           clientIp: clientIp,
+          responseTime: Math.round(responseTime * 100) / 100,
           tokenPayload: {
             username: decoded.username,
             exp: decoded.exp,
@@ -261,16 +283,12 @@ export async function GET(request: NextRequest) {
           }
         }
       },
-      {
-        headers: {
-          'X-RateLimit-Limit': '5',
-          'X-RateLimit-Remaining': rateLimitResult.remaining.toString(),
-          'X-RateLimit-Reset': Math.ceil(rateLimitResult.resetTime.getTime() / 1000).toString()
-        }
-      }
+      { headers }
     );
 
   } catch {
+    const responseTime = timer.getElapsed();
+    const headers = addResponseTimeHeaders({}, responseTime);
     // Secure logging - don't log sensitive information
     const clientIp = getClientIp(request);
     console.error('Token validation failed from IP:', clientIp);
@@ -281,7 +299,7 @@ export async function GET(request: NextRequest) {
         error: 'Internal server error',
         message: 'An error occurred while validating the token'
       },
-      { status: 500 }
+      { status: 500, headers }
     );
   }
 }

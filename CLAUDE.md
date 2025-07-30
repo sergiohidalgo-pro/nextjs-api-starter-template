@@ -20,6 +20,7 @@ This is a Next.js API project built with TypeScript, following SOLID principles 
 - **Swagger Documentation** - Interactive API documentation
 - **Frontend Interface** - Simple UI to test API endpoints
 - **Environment Configuration** - Secure config management with validation
+- **Docker Deployment** - Containerized deployment with MongoDB integration
 
 ## Architecture
 
@@ -42,6 +43,8 @@ src/
 │   ├── config/                 # Configuration
 │   │   ├── env.ts              # Environment validation
 │   │   └── swagger.ts          # Swagger configuration
+│   ├── db/                     # Database utilities
+│   │   └── mongodb.ts          # MongoDB connection
 │   ├── types/                  # TypeScript types
 │   ├── validators/             # Zod schemas
 │   └── utils/                  # Utility functions
@@ -53,34 +56,74 @@ src/
 
 - **Framework**: Next.js 15.4.3 with App Router
 - **Language**: TypeScript
+- **Database**: MongoDB with native driver
 - **Authentication**: JWT + TOTP (Google Authenticator)
 - **Validation**: Zod
 - **Documentation**: Swagger/OpenAPI 3.0
 - **Styling**: Tailwind CSS
 - **Package Manager**: pnpm
+- **Containerization**: Docker + Docker Compose
 
 ## Quick Start
 
-1. **Install dependencies**:
-   ```bash
-   pnpm install
-   ```
+### 🚀 Zero-Config Setup (Recommended)
 
-2. **Configure environment**:
-   ```bash
-   cp .env.example .env.local
-   # Edit .env.local with your configuration
-   ```
+Get running in 30 seconds with everything automated:
 
-3. **Start development server**:
-   ```bash
-   pnpm dev
-   ```
+```bash
+# Install dependencies and setup everything
+pnpm quick-setup
 
-4. **Access the application**:
-   - Main interface: http://localhost:3000
-   - API documentation: http://localhost:3000/docs
-   - Health check: http://localhost:3000/api/health
+# That's it! API will be at http://localhost:3000
+```
+
+This automatically:
+- ✅ Installs dependencies
+- ✅ Generates secure `.env` with random credentials
+- ✅ Starts MongoDB in Docker
+- ✅ Sets up database connection
+- ✅ Optionally starts the development server
+
+### 🛠️ Custom Setup (More Options)
+
+If you want to choose your setup approach:
+
+```bash
+# Interactive setup with options
+pnpm setup
+
+# Choose from:
+# 1. Hybrid setup (Docker MongoDB + Local API) - RECOMMENDED
+# 2. Full Docker Compose (API + MongoDB)
+# 3. Local development (requires local MongoDB)
+```
+
+### 📋 Manual Setup
+
+If you prefer manual control:
+
+```bash
+# 1. Install dependencies
+pnpm install
+
+# 2. Copy and customize environment
+cp .env.example .env
+# Edit .env with your preferences
+
+# 3. Start MongoDB (hybrid approach)
+docker run -d --name mongodb-dev -p 27017:27017 \
+  -e MONGO_INITDB_ROOT_USERNAME=admin \
+  -e MONGO_INITDB_ROOT_PASSWORD=password \
+  mongo:7-jammy
+
+# 4. Generate Prisma client
+pnpm prisma:generate
+
+# 5. Start development
+pnpm dev
+```
+
+**💡 TIP:** The hybrid approach (Docker MongoDB + Local API) is recommended for fastest development.
 
 ## API Endpoints
 
@@ -124,18 +167,32 @@ src/
 
 ## Environment Variables
 
-Required environment variables (set in `.env.local`):
+The setup scripts automatically generate a secure `.env` file. Manual configuration:
 
 ```env
+# Authentication (auto-generated during setup)
 JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
 JWT_EXPIRES_IN=1h
 AUTH_USERNAME=admin
 AUTH_PASSWORD=secure-password-123
 AUTH_2FA_SECRET=JBSWY3DPEHPK3PXP
+
+# Application
 NODE_ENV=development
 API_BASE_URL=http://localhost:3000
 RATE_LIMIT_MAX_REQUESTS=5
+
+# Database (choose one)
+MONGODB_URI=mongodb://localhost:27017/nextjs-api  # Hybrid (recommended)
+# MONGODB_URI=mongodb://mongo:27017/nextjs-api    # Full Docker
+# MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/db  # Production
+
+# MongoDB Root Credentials (for Docker containers)
+MONGO_ROOT_USER=admin
+MONGO_ROOT_PASSWORD=password
 ```
+
+**📄 See [MONGODB-SETUP.md](MONGODB-SETUP.md) for detailed database configuration**
 
 ## 2FA Setup
 
@@ -148,11 +205,26 @@ RATE_LIMIT_MAX_REQUESTS=5
 ## Development Commands
 
 ```bash
+# Setup Commands
+pnpm quick-setup      # Zero-config setup (recommended)
+pnpm setup            # Interactive setup with options
+pnpm init             # Alias for setup
+
 # Development
 pnpm dev              # Start development server
 pnpm build            # Build for production
 pnpm start            # Start production server
 pnpm lint             # Run ESLint
+
+# Docker Commands
+pnpm docker:up        # Start all services
+pnpm docker:down      # Stop all services
+pnpm docker:logs      # View API logs
+
+# Database Management
+docker stop mongodb-dev      # Stop hybrid MongoDB
+docker start mongodb-dev     # Start hybrid MongoDB
+docker rm mongodb-dev        # Remove MongoDB container
 ```
 
 ## Code Structure Guidelines

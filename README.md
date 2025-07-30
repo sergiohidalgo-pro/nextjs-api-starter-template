@@ -19,48 +19,72 @@ A production-ready Next.js API starter template with JWT authentication, 2FA sup
 
 ## 🚀 Quick Start
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/sergiohidalgo/nextjs-api-starter-template.git
-   cd nextjs-api-starter-template
-   ```
+### Option 1: Automated Setup (Recommended)
 
-2. **Install dependencies**
-   ```bash
-   pnpm install
-   ```
+```bash
+# Clone the repository
+git clone <your-repo-url>
+cd nextjs-api-starter-template
 
-3. **Setup environment**
-   ```bash
-   cp .env.example .env.local
-   # Edit .env.local with your configuration
-   ```
+# Run the automated setup script
+./scripts/init-project.sh
+```
 
-4. **Generate secrets** (optional)
-   ```bash
-   # Generate JWT secret
-   pnpm run generate:jwt-secret
-   
-   # Generate 2FA secret
-   pnpm run generate:2fa-secret
-   ```
+The script will automatically:
+- ✅ Install all dependencies
+- ✅ Generate secure environment variables
+- ✅ Set up your preferred development environment (local/Docker)
+- ✅ Create admin credentials with 2FA
+- ✅ Start the development server
 
-5. **Start development server**
-   ```bash
-   pnpm dev
-   ```
+### Option 2: Manual Setup
 
-6. **Access the application**
-   - Main interface: http://localhost:3000
-   - API documentation: http://localhost:3000/docs
-   - Health check: http://localhost:3000/api/health
+```bash
+# 1. Install dependencies
+pnpm install
+
+# 2. Setup environment with automation
+./scripts/dev-tools.sh setup
+
+# 3. Start development
+./scripts/dev-tools.sh dev
+
+# OR manually
+cp .env.example .env.local  # Edit as needed
+pnpm dev
+```
+
+### Option 3: Docker (All-in-One)
+
+```bash
+# Start everything with Docker
+docker-compose up -d
+
+# Access at http://localhost:3000
+```
+
+### 🎯 Quick Access
+
+After setup, access your application:
+- **Main interface**: http://localhost:3000
+- **API documentation**: http://localhost:3000/docs  
+- **Health check**: http://localhost:3000/api/health
+
+### 📱 2FA Setup
+
+Add the generated 2FA secret to Google Authenticator:
+1. Open your authenticator app
+2. Scan QR code or enter the secret manually
+3. Account: "Next.js API Starter"
 
 ## 📚 Documentation
 
-- **[Setup Guide](./docs/SETUP.md)** - Detailed setup instructions
-- **[API Documentation](./docs)** - Complete API reference
+- **[Developer Setup Guide](./DEVELOPER-SETUP.md)** - Complete setup instructions for developers
+- **[Development Tools](./scripts/dev-tools.sh)** - Utility scripts for common tasks
+- **[API Documentation](./docs)** - Complete API reference  
 - **[Security Guide](./docs/SECURITY.md)** - Security implementation details
 - **[Architecture Guide](./CLAUDE.md)** - Project structure and patterns
+- **[MongoDB Setup](./SETUP-MONGO.md)** - Database setup instructions
 
 ## 🔧 API Endpoints
 
@@ -119,40 +143,61 @@ src/
 ## 🧪 Testing
 
 ```bash
-# Run all tests
-pnpm test
+# Using development tools (recommended)
+./scripts/dev-tools.sh test unit          # Unit tests
+./scripts/dev-tools.sh test integration   # Integration tests
+./scripts/dev-tools.sh test auth          # Authentication tests
+./scripts/dev-tools.sh test coverage      # With coverage
 
-# Run tests in watch mode
-pnpm test:watch
+# Or directly with pnpm
+pnpm test                    # Run all tests
+pnpm test:watch             # Watch mode
+pnpm test:coverage          # With coverage
+pnpm lint                   # Lint code
+```
 
-# Run tests with coverage
-pnpm test:coverage
+## 🛠️ Development Tools
 
-# Lint code
-pnpm lint
+We've created a comprehensive development tools script to make your workflow easier:
+
+```bash
+# Show all available commands
+./scripts/dev-tools.sh help
+
+# Common commands
+./scripts/dev-tools.sh setup           # Initial project setup
+./scripts/dev-tools.sh dev             # Start development server
+./scripts/dev-tools.sh docker up       # Start Docker services
+./scripts/dev-tools.sh auth test       # Test authentication
+./scripts/dev-tools.sh db status       # Check database connection
+./scripts/dev-tools.sh clean           # Clean/reset project
 ```
 
 ## 🚀 Deployment
 
-### Environment Variables
+### Quick Deploy with Docker
 
-Set these in your production environment:
+```bash
+# Production deployment
+docker-compose up -d
 
-```env
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-JWT_EXPIRES_IN=1h
-AUTH_USERNAME=admin
-AUTH_PASSWORD=secure-password-123
-AUTH_2FA_SECRET=JBSWY3DPEHPK3PXP
-NODE_ENV=production
-RATE_LIMIT_MAX_REQUESTS=5
+# Or use the development tools
+./scripts/dev-tools.sh docker up
 ```
 
-### Production Build
+### Manual Production Build
 
 ```bash
 pnpm build
 pnpm start
+```
+
+### Environment Variables
+
+**Important**: Use the automated setup to generate secure variables:
+
+```bash
+./scripts/init-project.sh  # Generates secure JWT secrets and passwords
 ```
 
 ## 🤝 Contributing
